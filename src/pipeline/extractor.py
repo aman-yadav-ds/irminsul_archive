@@ -13,15 +13,18 @@ class LoreExtractor:
         self.db.connect()
 
         self.entity_resolver = EntityResolver()
+
+        self.model_name = "qwen2.5-coder:7b"
         
         # CHANGED: Initialize Local LLM
         # "format": "json" is CRITICAL. It forces the model to only output valid JSON.
         # temperature=0 makes it deterministic (less creative, more precise).
         self.llm = ChatOllama(
-            model="qwen2.5:7b", 
+            model=self.model_name, 
             temperature=0,
             format="json" 
         )
+
 
     def chunk_text(self, text, chunk_size=6000):
         # CHANGED: Local models have smaller context windows than Gemini.
@@ -35,9 +38,10 @@ class LoreExtractor:
 
     def process_directory(self, dir_path="data/raw"):
         files = glob.glob(os.path.join(dir_path, "*.txt"))
-        print(f"📂 Found {len(files)} files. Starting Local Extraction (Qwen 2.5 7B)...")
+        print(f"📂 Found {len(files)} files. Starting Local Extraction {self.model_name}...")
 
-        for filepath in files:
+        for i, filepath in enumerate(files):
+            if i == 1: break # For testing, only process the first 1 files. Remove this line for full run.
             filename = os.path.basename(filepath)
             print(f"\n📖 Reading {filename}...")
             
@@ -61,7 +65,7 @@ class LoreExtractor:
     def extract_and_upload(self, text, chunk_index=0, source_file="Unknown"):
         # SIMPLIFIED PROMPT: Smaller models need less "fluff" and more concrete examples.
         prompt = f"""
-        Extract Genshin Impact lore entities and relationships from the text below.
+        You are a precise linguistics and lore extraction AI. Extract Genshin Impact lore entities and relationships from the text below.
         
         CRITICAL: Output MUST be valid JSON.
         
@@ -75,15 +79,26 @@ class LoreExtractor:
             ]
         }}
 
-        Rules:
-        1. Use 'ANCESTOR_OF' (Active voice) instead of 'DESCENDED_FROM'.
-        2. Use 'WORSHIPS' (Active voice) instead of 'WORSHIPPED_BY'.
-        3. If you see [TABLE_DATA], extract the rows as facts.
-        4. Only include entities and relationships that are explicitly supported by the text. No speculation!
-        5. Ensure all entity names are consistent and resolve to a single canonical name when possible.
-        6. Ensure the relationships points to target entities that are actually mentioned in the text.
+        STRICT RULES:
+        1. ONLY extract relationships explicitly stated as a fact in the Text. Do not invent or deduce relationships.
+        2. You MUST USE active voice to describe relationships. For example, use "CREATOR_OF" instead of "DESCENDED_FROM". This ensures clarity and consistency in the graph.
+        3. Use ALL CAPS for relationship types and avoid vague terms like "RELATED_TO". Be as specific as possible (e.g., "CREATED", "OPPOSED_TO", "ALLIED_WITH").
+        4. Ensure the relationships point to target entities that are actually mentioned in the text.
 
-        Text:
+        EXAMPLE:
+        Text: "The Abyss holds the power of the Void Realm, which is diametrically opposed to the powers of the Light Realm."
+        Output:
+        {{
+            "entities": [
+                {{"canonical_name": "Abyss", "aliases": ["Void Realm"], "label": "Realm"}},
+                {{"canonical_name": "Light Realm", "aliases": [], "label": "Realm"}}
+            ],
+            "relationships": [
+                {{"source": "Abyss", "target": "Light Realm", "type": "OPPOSED_TO"}}
+            ]
+        }}
+
+        Now, process the following Text:
         {text}
         """
 

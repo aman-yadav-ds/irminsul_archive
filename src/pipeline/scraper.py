@@ -77,14 +77,25 @@ class GenshinSmartScraper:
                 break
 
         # 5. TEXT EXTRACTION & REGEX CLEANING
-        text = content.get_text(separator="\n")
+        # Inject newlines at the end of block elements to preserve paragraph structure
+        for block_tag in content.find_all(['p', 'h2', 'h3', 'h4', 'li', 'div']):
+            block_tag.append('\n\n')
+        for br_tag in content.find_all('br'):
+            br_tag.replace_with('\n')
+
+        # Use a space separator so inline tags (<a>, <b>) don't break sentences!
+        text = content.get_text(separator=" ")
         
-        # Remove [Note 1], [1], etc.
+        # Remove citations like [Note 1], [1], etc.
         text = re.sub(r"\[\s*(Note\s*)?\d+\s*\]", "", text)
         # Remove the "↑" arrows from notes
         text = re.sub(r"↑", "", text)
-        # Collapse whitespace
-        text = re.sub(r"\n\s*\n", "\n\n", text)
+        
+        # Deep space cleaning: fix all the formatting artifacts
+        text = re.sub(r' +', ' ', text)               # Collapse multiple spaces into one
+        text = re.sub(r' \n', '\n', text)             # Remove spaces immediately before a newline
+        text = re.sub(r'\n ', '\n', text)             # Remove spaces immediately after a newline
+        text = re.sub(r'\n{3,}', '\n\n', text)        # Cap maximum empty lines to two
         
         return text.strip()
 
@@ -156,7 +167,7 @@ class GenshinSmartScraper:
         except Exception as e:
             print(f"⚠️ Error processing {page_title}: {e}")
 
-    def crawl_category(self, category_name, limit=50):
+    def crawl_category(self, category_name, limit=100):
         """
         Smart Harvester: Uses the MediaWiki API to get category members.
         This bypasses HTML/CSS changes and JavaScript lazy-loading.

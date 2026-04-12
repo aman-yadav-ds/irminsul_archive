@@ -16,7 +16,7 @@ class LoreReasoner:
         )
 
         self.llm = ChatOllama(
-            model="qwen2.5:7b",
+            model="qwen2.5-coder:7b",
             temperature=0.3,
             
         )
@@ -30,29 +30,29 @@ class LoreReasoner:
         {schema}
         
         Instructions:
-        1. **Membership Discovery**: If the question asks "Who are..." or "List the members of..." a group:
+        1. **Entity Profiling (Who is / What is X)**: 
+           - Example: MATCH (e:Entity)-[r]-(related:Entity) 
+                      WHERE e.name =~ '(?i).*Scaramouche.*' 
+                      RETURN startNode(r).name AS Subject, type(r) AS Action, endNode(r).name AS Object
+        2. **Membership Discovery**: If the question asks "Who are..." or "List the members of..." a group:
            - First, find the group node.
            - Then, return all entities connected to it.
            - Example: MATCH (group:Entity)-[r]-(member:Entity) 
                       WHERE group.name =~ '(?i).*Eight.*Adepts.*' 
                       RETURN member.name, type(r)
-        2. **Fuzzy Search**: Use `CONTAINS` or `(?i)` for names.
-           - Example: MATCH (n:Entity) WHERE n.name =~ '(?i).*Abyss.*' RETURN n
-        3. **Wildcards**: Use `-[r]-` (undirected) to find all possible connections if the specific relationship type is unknown.
-        4. To find entities with messy names, use the full-text index:
-            CALL db.index.fulltext.queryNodes('entity_names', 'Adventurers Guild') 
-            YIELD node, score 
-            RETURN node.name
-        5. Examples: 
+        3. **Fuzzy Search**: ALWAYS use `CONTAINS` or regex `(?i).*Name.*` for names to catch slight variations. Avoid strict `=` matching unless absolutely necessary.
+        4. **Wildcards**: Use `-[r]-` (undirected) to find all possible connections if the specific relationship type is unknown.
+        
+        Examples: 
         Question: Who is in the Adventurers' Guild?
         Cypher: MATCH (m:Entity)-[r]-(g:Entity) WHERE g.name =~ '(?i).*Adventurer.*Guild.*' RETURN m.name, type(r)
 
         Question: What are the Adepti?
-        Cypher: MATCH (e:Entity) WHERE e.name = 'Adepti' OR e.label = 'Adepti' RETURN e.name, e.aliases
+        Cypher: MATCH (e:Entity)-[r]-(related:Entity) WHERE e.name =~ '(?i).*Adepti.*' RETURN e.name, e.aliases, type(r), related.name
         
         CRITICAL:
-        - Return ONLY the Cypher query.
-        - Do not add comments.
+        - Return ONLY the valid Cypher query.
+        - Do not add explanations or markdown blocks around the query.
         - Combine results into one return statement.
         
         Question: {question}
@@ -98,4 +98,4 @@ if __name__ == "__main__":
     bot = LoreReasoner()
     
     # 2. Test "Connection" logic
-    print(bot.ask("Who is Vedrfolnir?"))
+    print(bot.ask("Why is the Abyss so important in the lore?"))

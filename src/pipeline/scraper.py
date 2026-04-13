@@ -218,8 +218,9 @@ if __name__ == "__main__":
         "Lore",
         "Book Collections",
         "Factions",
-        "Gods"
+        "Gods",
+        "Mythology",
     ]
     
     for cat in target_categories:
-        scraper.crawl_category(cat, limit=10)
+        scraper.crawl_category(cat, limit=200)

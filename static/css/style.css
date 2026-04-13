@@ -1,0 +1,167 @@
+:root {
+    --bg-deep: #0a0505;
+    --panel-bg: rgba(25, 15, 15, 0.7);
+    --panel-border: rgba(239, 56, 56, 0.2); /* Red tint */
+    
+    /* Change the glowing elements to fiery colors */
+    --irminsul-cyan: #ff4b2b;  /* Vibrant Flame Orange */
+    --irminsul-green: #ff416c; /* Deep Crimson */
+    
+    --text-main: #f8e5e5;
+    --text-muted: #b89494;
+    
+    --font-heading: 'Cinzel', serif;
+    --font-body: 'Noto Sans', sans-serif;
+}
+
+body.irminsul-theme {
+    background-color: var(--bg-deep);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Background Animation imitating Ley Lines */
+.ley-line-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(17, 153, 142, 0.05) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Typography */
+.title-glow {
+    font-family: var(--font-heading);
+    color: #ffffff;
+    text-shadow: 0 0 15px var(--irminsul-cyan), 0 0 30px var(--irminsul-cyan);
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    color: var(--irminsul-green);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Inputs and Buttons */
+.custom-input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--irminsul-cyan);
+    color: #fff;
+    border-radius: 8px;
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.custom-input:focus {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--irminsul-green);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(56, 239, 125, 0.3);
+    outline: none;
+}
+
+.custom-input::placeholder {
+    color: var(--text-muted);
+}
+
+.custom-btn {
+    background: linear-gradient(135deg, var(--irminsul-cyan), var(--irminsul-green));
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 0 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    font-family: var(--font-heading);
+    letter-spacing: 1px;
+}
+
+.custom-btn:hover {
+    box-shadow: 0 0 20px rgba(56, 239, 125, 0.6);
+    transform: translateY(-1px);
+}
+
+.custom-btn:disabled {
+    background: #333;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Content Boxes */
+.text-answer {
+    padding: 25px;
+    display: none;
+    line-height: 1.6;
+    font-size: 1.05rem;
+    border-left: 4px solid var(--irminsul-green);
+}
+
+.graph-container {
+    height: 600px;
+    width: 100%;
+}
+
+/* Custom CSS Spinner for Ley Line theme */
+.ley-line-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0,0,0,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+body.irminsul-theme {
+    /* Set the background image */
+    background-image: url('../img/burning_irminsul.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Keeps the background still while scrolling */
+    
+    color: var(--text-main);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* We change the overlay to darken the bright flames, ensuring readability */
+.ley-line-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* A dark radial gradient that fades into an abyssal black/red tint */
+    background: radial-gradient(circle at 50% 50%, rgba(20, 10, 15, 0.6) 0%, rgba(10, 5, 10, 0.85) 100%);
+    z-index: 0;
+    pointer-events: none;
+}

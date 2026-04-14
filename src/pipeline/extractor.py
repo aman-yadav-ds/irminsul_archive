@@ -135,10 +135,11 @@ class LoreExtractor:
         === RELEVANT KNOWN ENTITIES AND ALIASES ===
         Below is a dynamically fetched dictionary of canonical names and their known aliases relevant to this text. 
         If you encounter an alias in the text, you MUST use its canonical name for the "canonical_name" field.
+        And you MUST use the known aliases to help resolve any ambiguous references in the text.
         {known_aliases_str}
         ===========================================
 
-        Schema:
+        Schema Example:
         {{
             "reasoning": "First, briefly write out who is performing the action and who is receiving it to establish the correct direction.",
             "entities": [

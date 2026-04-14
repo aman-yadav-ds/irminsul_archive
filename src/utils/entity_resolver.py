@@ -1,6 +1,7 @@
 import chromadb
 from chromadb.utils import embedding_functions
 
+
 class EntityResolver:
     def __init__(self, collection_name="genshin_entities"):
         # Local persistent storage

@@ -1,6 +1,8 @@
 # 🌍 Teyvat Lore Graph
 ### *A knowledge engine built for the world of Genshin Impact — where a graph database meets a vector store to answer every lore question you've ever had.*
 
+Note :- The real Github repo was deleted beacuse of the gemini key breach So this is the new Repo.
+
 ---
 
 ## The Story Behind It

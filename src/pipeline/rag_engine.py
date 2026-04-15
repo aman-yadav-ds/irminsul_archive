@@ -22,16 +22,24 @@ class LoreReasoner:
         self.vector_collection = self.chroma_client.get_or_create_collection("raw_lore")
 
         # 3. LLM Setup: The "Split-Brain" Architecture
+        self.llm = ChatOllama(
+            model="qwen2.5-coder:7b", 
+            temperature=0, 
+            top_p=0.1, 
+            top_k=10, 
+            num_predict=50,
+            format="json"
+        )
 
         # --- THE EXTRACTOR (Left Brain) ---
         # Highly restricted, robotic, and deterministic. 
         # Goal: Never hallucinate, only extract exact strings.
-        self.graph_query_llm = ChatOllama(
+        self.spelling_check_llm = ChatOllama(
             model="qwen2.5-coder:7b", 
-            temperature=0.0,
-            top_p=0.1,          
-            top_k=10,           
-            num_predict=50,     # Keep it short, it only needs to output a JSON list
+            temperature=0, 
+            top_p=0.1, 
+            top_k=10,
+            num_predict=50,
             format="json"
         )
 
@@ -178,40 +186,22 @@ class LoreReasoner:
         print("🪄 Extracting entities and checking spelling...")
         
         prompt = f"""
-        Extract the core Genshin Impact entities (characters, places, items) from the user's question.
+        Extract the core Genshin Impact entities (characters, places, items) from the user's question. These entities will be used to query the graph database, so they must be as accurate as possible.
         
         CRITICAL RULES:
-        1. Extract the EXACT text the user typed.
-        2. DO NOT correct the user's spelling.
+        1. ONLY extract entities that are explicitly mentioned in the question.
+        2. Try to correct the user's spelling (e.g., "Traveller" -> "Traveler").
         3. DO NOT guess, translate, or substitute names. 
-        4. Ignore generic filler words.
         
         Question: "{question}"
         
-        Output ONLY a valid JSON list of strings.
+        Output ONLY a valid JSON list of strings containing the corrected entity names.
         """
         
         # USE THE EXTRACTOR LLM
-        response = self.graph_query_llm.invoke(prompt)
-        
-        try:
-            messy_names = json.loads(response.content)
-        except:
-            return question, [] # Fallback
-            
-        canonical_names_found = []
-        
-        for messy_name in messy_names:
-            results = self.aliases_collection.query(
-                query_texts=[messy_name],
-                n_results=1 
-            )
-            
-            if results['metadatas'] and results['metadatas'][0]:
-                canonical_name = results['metadatas'][0][0]['canonical_name']
-                if canonical_name not in canonical_names_found:
-                    canonical_names_found.append(canonical_name)
-                
+        response = self.spelling_check_llm.invoke(prompt)
+        canonical_names_found = json.loads(response.content)['entities']
+               
         print(f"   ✅ Identified Canonical Entities: {canonical_names_found}")
         return question, canonical_names_found
 if __name__ == "__main__":
